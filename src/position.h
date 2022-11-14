@@ -2,9 +2,10 @@
 #ifndef POSITION
 #define POSITION
 
-class Position {
-    unsigned int line;
-    unsigned int position;
+#include <cstddef>
+struct Position {
+    size_t line;
+    size_t position;
 };
 
 #endif

@@ -4,17 +4,19 @@
 
 namespace Token {
 std::ostream &operator<<(std::ostream &strm, const Token &a) {
-    return strm << "Token: "
-                << "type: " << a.type << ", lexeme: \"" << a.lexeme << "\" ";
+    return strm << "Token: { "
+                << "type: " << a.type << ", lexeme: \"" << a.lexeme << "\" }";
 }
+
+} // namespace Token
 std::ostream &operator<<(std::ostream &strm, const TokenType &a) {
     switch (a) {
     case TokenType::LeftParen:
         return strm << "LeftParen";
     case TokenType::RightParen:
         return strm << "RightParen";
-    case TokenType::leftBrace:
-        return strm << "leftBrace";
+    case TokenType::LeftBrace:
+        return strm << "LeftBrace";
     case TokenType::RightBrace:
         return strm << "RightBrace";
     case TokenType::Comma:
@@ -90,4 +92,3 @@ std::ostream &operator<<(std::ostream &strm, const TokenType &a) {
         break;
     }
 }
-} // namespace Token

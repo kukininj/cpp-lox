@@ -1,16 +1,16 @@
 #include "position.h"
 #include <iostream>
 #include <variant>
+#include <optional>
 
 #ifndef TOKEN
 #define TOKEN
 
 
-namespace Token {
 enum class TokenType {
     // clang-format off
     // Single-character tokens.
-    LeftParen, RightParen, leftBrace, RightBrace,
+    LeftParen, RightParen, LeftBrace, RightBrace,
     Comma, Dot, Minus, Plus, Semicolon, Slash, Star,
 
     // One or two character tokens.
@@ -32,10 +32,11 @@ enum class TokenType {
 
 std::ostream& operator<<(std::ostream &stream, const TokenType &t);
 
+namespace Token {
 struct Token {
     TokenType type;
     std::string lexeme;
-    std::variant<std::string, double> literal;
+    std::optional<std::variant<std::string, double> > literal;
     Position position;
 };
 
