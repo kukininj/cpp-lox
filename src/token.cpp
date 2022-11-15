@@ -5,7 +5,8 @@
 namespace Token {
 std::ostream &operator<<(std::ostream &strm, const Token &a) {
     return strm << "Token: { "
-                << "type: " << a.type << ", lexeme: \"" << a.lexeme << "\" }";
+                << "type: " << a.type << ", lexeme: \"" << a.lexeme << "\" "
+                << "position: " << a.position << " }";
 }
 
 } // namespace Token

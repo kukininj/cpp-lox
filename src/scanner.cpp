@@ -6,7 +6,7 @@
 bool Scanner::isAtEnd() { return this->sourcePosition >= this->source.size(); }
 
 Scanner::Scanner(std::string source) {
-    lineNumber = 0;
+    lineNumber = 1;
     linePosition = 0;
     lexemeStart = 0;
     sourcePosition = 0;
@@ -34,7 +34,7 @@ bool Scanner::match(char c) {
         return false;
 
     this->sourcePosition++;
-    this->linePosition++;
+    // this->linePosition++;
     return true;
 }
 
@@ -83,7 +83,7 @@ void Scanner::scanToken() {
         break;
     case '\n':
         this->lineNumber++;
-        this->linePosition = 1;
+        this->linePosition = 0;
         break;
     default:
         throw new Exceptions::SyntaxError("Unexpected character at");
@@ -99,7 +99,7 @@ void Scanner::skipComment() {
 
     // size_t commentLength = commentEnd - this->sourcePosition;
     this->sourcePosition = commentEnd + 1;
-    this->linePosition = 1;
+    this->linePosition = 0;
     this->lineNumber += 1;
 }
 
@@ -110,11 +110,11 @@ void Scanner::skipWhitespaceCharacters() {
         case '\t':
         case '\r':
             this->sourcePosition++;
-            this->linePosition++;
+            // this->linePosition++;
             break;
         case '\n':
             this->sourcePosition++;
-            this->linePosition = 1;
+            this->linePosition = 0;
             this->lineNumber++;
             break;
         default:
@@ -146,4 +146,5 @@ void Scanner::addToken(TokenType type) {
                                             }});
         break;
     }
+    this->linePosition += len - 1;
 }
