@@ -2,14 +2,40 @@
 #include <iostream>
 #include <variant>
 
+template <typename... Ts> struct Overload : Ts... { using Ts::operator()...; };
+template <class... Ts> Overload(Ts...) -> Overload<Ts...>;
+
 namespace Token {
 std::ostream &operator<<(std::ostream &strm, const Token &a) {
-    return strm << "Token: { "
-                << "type: " << a.type << ", lexeme: \"" << a.lexeme << "\" "
-                << "position: " << a.position << " }";
+    if (a.literal.has_value()) {
+        return strm << "Token: { "
+                    << "type: " << a.type << ", lexeme: \"" << a.lexeme
+                    << "\", "
+                    << "value: " << a.literal.value() << ", "
+                    << "position: {" << a.position << "} }";
+    } else {
+        return strm << "Token: { "
+                    << "type: " << a.type << ", lexeme: \"" << a.lexeme
+                    << "\", "
+                    << "position: {" << a.position << "} }";
+    }
 }
 
+std::ostream &operator<<(std::ostream &strm, const Literal &l) {
+    return std::visit(
+        Overload{
+            [&strm](const auto &s) -> std::ostream & { return strm << s; }
+            // [&strm](const std::string &s) -> std::ostream & {
+            //     return strm << s;
+            // }
+            // [&strm](const double &d) -> std::ostream & {
+            //     return strm << d;
+            // }
+        },
+        l);
+}
 } // namespace Token
+
 std::ostream &operator<<(std::ostream &strm, const TokenType &a) {
     switch (a) {
     case TokenType::LeftParen:

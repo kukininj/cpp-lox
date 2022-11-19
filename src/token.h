@@ -30,16 +30,19 @@ enum class TokenType {
     // clang-format on
 };
 
-std::ostream& operator<<(std::ostream &stream, const TokenType &t);
-
 namespace Token {
+typedef std::variant<std::string, double> Literal;
+
 struct Token {
     TokenType type;
     std::string lexeme;
-    std::optional<std::variant<std::string, double> > literal;
+    std::optional<Literal> literal;
     Position position;
 };
 
 std::ostream &operator<<(std::ostream &strm, const Token &a); 
+std::ostream& operator<<(std::ostream &stream, const Literal &t);
 }
+
+std::ostream& operator<<(std::ostream &stream, const TokenType &t);
 #endif

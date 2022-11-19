@@ -1,10 +1,32 @@
 #include "scanner.h"
 #include "exceptions.h"
 #include "token.h"
+#include <stdexcept>
+#include <variant>
 #include <vector>
 
 bool Scanner::isAtEnd() { return this->sourcePosition >= this->source.size(); }
 
+char Scanner::currentCharacter() {
+    if (this->isAtEnd())
+        return '\0';
+
+    return source[sourcePosition];
+}
+
+Position Scanner::getPosition() {
+    return Position{
+        .line = this->lineNumber,
+        .position = this->linePosition,
+    };
+}
+
+char Scanner::nextCharacter() {
+    if (this->isAtEnd())
+        return '\0';
+
+    return source[sourcePosition + 1];
+}
 Scanner::Scanner(std::string source) {
     lineNumber = 1;
     linePosition = 0;
@@ -30,7 +52,7 @@ char Scanner::consumeCharacter() {
 bool Scanner::match(char c) {
     if (isAtEnd())
         return false;
-    if (this->source[this->sourcePosition] != c)
+    if (this->currentCharacter() != c)
         return false;
 
     this->sourcePosition++;
@@ -85,6 +107,17 @@ void Scanner::scanToken() {
         this->lineNumber++;
         this->linePosition = 0;
         break;
+    case '"':
+        this->scanStringLiteral();
+        break;
+    case '0' ... '9':
+        this->scanNumberLiteral();
+        break;
+    case 'a' ... 'z':
+    case 'A' ... 'Z':
+    case '_':
+        this->scanIdentifier();
+        break;
     default:
         throw new Exceptions::SyntaxError("Unexpected character at");
         break;
@@ -105,7 +138,7 @@ void Scanner::skipComment() {
 
 void Scanner::skipWhitespaceCharacters() {
     while (this->sourcePosition < this->source.size()) {
-        switch (this->source[this->sourcePosition]) {
+        switch (this->currentCharacter()) {
         case ' ':
         case '\t':
         case '\r':
@@ -123,28 +156,88 @@ void Scanner::skipWhitespaceCharacters() {
     }
 }
 
+void Scanner::scanStringLiteral() {
+    while ((this->currentCharacter() != '"') && !this->isAtEnd()) {
+        this->sourcePosition++;
+        // if (this->currentCharacter()) {
+        //     this->lineNumber++;
+        //     this->linePosition = 0;
+        // }
+        // this->currentCharacter() may only be '"' of '\n'
+        if (this->isAtEnd()) {
+            throw new Exceptions::SyntaxError("Unterminated string literal");
+        }
+    }
+
+    // skip ending '"'
+    this->sourcePosition++;
+
+    size_t len = this->sourcePosition - this->lexemeStart - 1;
+    std::string value = this->source.substr(this->lexemeStart + 1, len - 1);
+    this->addToken(value);
+}
+
+void Scanner::scanNumberLiteral() {
+    while ((std::isdigit(this->currentCharacter()))) {
+        this->sourcePosition++;
+    }
+
+    if (this->currentCharacter() == '.' &&
+        std::isdigit(this->nextCharacter())) {
+        this->sourcePosition++;
+
+        while ((std::isdigit(this->currentCharacter()))) {
+            this->sourcePosition++;
+        }
+    }
+
+    // 12.34
+    // lexemeStart = 0;
+    // sourcePosition = 5
+    auto len = this->sourcePosition - this->lexemeStart;
+    auto number = source.substr(this->lexemeStart, len);
+    double value = std::stof(number);
+    this->addToken(value);
+}
+
+void Scanner::scanIdentifier() {}
+
 void Scanner::addToken(TokenType type) {
     size_t len = this->sourcePosition - this->lexemeStart;
-    std::string lexeme =
-        this->source.substr(this->lexemeStart, len);
+    std::string lexeme = this->source.substr(this->lexemeStart, len);
 
     switch (type) {
     case TokenType::Identifier:
-        throw new Exceptions::NotImplemented(
-            "Identifiers are not implemented!");
-        break;
+        throw new std::logic_error("This function can't handle Identifiers!");
     case TokenType::String:
+        throw new std::logic_error("This function can't handle String literals!");
     case TokenType::Number:
-        throw new Exceptions::NotImplemented("Literals are not implemented!");
-        break;
+        throw new std::logic_error("This function can't handle Number literals!");
     default:
-        this->tokens.push_back(Token::Token{.type = type,
-                                            .lexeme = lexeme,
-                                            .position = Position{
-                                                .line = this->lineNumber,
-                                                .position = this->linePosition,
-                                            }});
+        this->tokens.push_back(Token::Token{
+            .type = type, .lexeme = lexeme, .position = this->getPosition()});
         break;
     }
+    this->linePosition += len - 1;
+}
+
+template <typename... Ts> struct Overload : Ts... { using Ts::operator()...; };
+template <class... Ts> Overload(Ts...) -> Overload<Ts...>;
+void Scanner::addToken(Token::Literal literal) {
+    size_t len = this->sourcePosition - this->lexemeStart;
+    std::string lexeme = this->source.substr(this->lexemeStart, len);
+
+    TokenType type = TokenType::Eof;
+
+    std::visit(Overload{[&type](std::string &_) { type = TokenType::String; },
+                        [&type](double &_) { type = TokenType::Number; }},
+               literal);
+
+    this->tokens.push_back(Token::Token{
+        .type = type,
+        .lexeme = lexeme,
+        .literal = literal,
+        .position = this->getPosition(),
+    });
     this->linePosition += len - 1;
 }

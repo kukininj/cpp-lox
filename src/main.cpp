@@ -32,9 +32,13 @@ void run_file(std::string filename) {
         source = stream.str();
         Scanner scanner(source);
 
-        auto tokens = scanner.getTokens();
-        for (auto &token : tokens) {
-            std::cout << token << std::endl;
+        try {
+            auto tokens = scanner.getTokens();
+            for (auto &token : tokens) {
+                std::cout << token << std::endl;
+            }
+        } catch (std::exception e) {
+            std::cout << e.what() << std::endl;
         }
     } else {
         printf("Could not read file %s", filename.c_str());
