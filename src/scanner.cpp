@@ -2,6 +2,7 @@
 #include "exceptions.h"
 #include "token.h"
 #include <stdexcept>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -159,10 +160,6 @@ void Scanner::skipWhitespaceCharacters() {
 void Scanner::scanStringLiteral() {
     while ((this->currentCharacter() != '"') && !this->isAtEnd()) {
         this->sourcePosition++;
-        // if (this->currentCharacter()) {
-        //     this->lineNumber++;
-        //     this->linePosition = 0;
-        // }
         // this->currentCharacter() may only be '"' of '\n'
         if (this->isAtEnd()) {
             throw new Exceptions::SyntaxError("Unterminated string literal");
@@ -191,16 +188,42 @@ void Scanner::scanNumberLiteral() {
         }
     }
 
-    // 12.34
-    // lexemeStart = 0;
-    // sourcePosition = 5
     auto len = this->sourcePosition - this->lexemeStart;
     auto number = source.substr(this->lexemeStart, len);
     double value = std::stof(number);
     this->addToken(value);
 }
 
-void Scanner::scanIdentifier() {}
+bool isAlphaNumeric(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+           (c >= '0' && c <= '9') || c == '_';
+}
+void Scanner::scanIdentifier() {
+    while ((isAlphaNumeric(this->currentCharacter())) && !this->isAtEnd()) {
+        this->sourcePosition++;
+        // this->currentCharacter() may only be '"' of '\n'
+    }
+
+    size_t len = this->sourcePosition - this->lexemeStart;
+    std::string name = this->source.substr(this->lexemeStart, len);
+
+    static std::unordered_map<std::string, TokenType> keywords{
+        {"and", TokenType::And},       {"class", TokenType::Class},
+        {"else", TokenType::Else},     {"false", TokenType::False},
+        {"for", TokenType::For},       {"fun", TokenType::Fun},
+        {"if", TokenType::If},         {"nil", TokenType::Nil},
+        {"or", TokenType::Or},         {"print", TokenType::Print},
+        {"return", TokenType::Return}, {"super", TokenType::Super},
+        {"this", TokenType::This},     {"true", TokenType::True},
+        {"var", TokenType::Var},       {"while", TokenType::While},
+    };
+
+    if (auto type = keywords.find(name); type != keywords.end()) {
+        this->addToken(type->second);
+    } else {
+        this->addIdentifier(name);
+    }
+}
 
 void Scanner::addToken(TokenType type) {
     size_t len = this->sourcePosition - this->lexemeStart;
@@ -210,9 +233,11 @@ void Scanner::addToken(TokenType type) {
     case TokenType::Identifier:
         throw new std::logic_error("This function can't handle Identifiers!");
     case TokenType::String:
-        throw new std::logic_error("This function can't handle String literals!");
+        throw new std::logic_error(
+            "This function can't handle String literals!");
     case TokenType::Number:
-        throw new std::logic_error("This function can't handle Number literals!");
+        throw new std::logic_error(
+            "This function can't handle Number literals!");
     default:
         this->tokens.push_back(Token::Token{
             .type = type, .lexeme = lexeme, .position = this->getPosition()});
@@ -237,6 +262,19 @@ void Scanner::addToken(Token::Literal literal) {
         .type = type,
         .lexeme = lexeme,
         .literal = literal,
+        .position = this->getPosition(),
+    });
+    this->linePosition += len - 1;
+}
+
+void Scanner::addIdentifier(std::string name) {
+    size_t len = this->sourcePosition - this->lexemeStart;
+    std::string lexeme = this->source.substr(this->lexemeStart, len);
+
+    this->tokens.push_back(Token::Token{
+        .type = TokenType::Identifier,
+        .lexeme = lexeme,
+        .literal = name,
         .position = this->getPosition(),
     });
     this->linePosition += len - 1;

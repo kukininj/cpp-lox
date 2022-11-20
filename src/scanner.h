@@ -34,6 +34,7 @@ class Scanner {
     void scanToken();
     void addToken(TokenType type);
     void addToken(Token::Literal literal);
+    void addIdentifier(std::string name);
 
   public:
     Scanner(std::string source);
