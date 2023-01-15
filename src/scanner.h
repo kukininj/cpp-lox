@@ -20,8 +20,11 @@ class Scanner {
     bool isAtEnd();
     char currentCharacter();
     char nextCharacter();
-    
-    Position getPosition();
+
+    void advanceLinePosition();
+
+    Position getPosition() const;
+    std::string getLexeme() const;
 
     char consumeCharacter();
     bool match(char c);
@@ -31,10 +34,16 @@ class Scanner {
     void scanNumberLiteral();
     void scanIdentifier();
 
+    template <typename T> void addToken() {
+        this->tokens.push_back(T{getLexeme(), getPosition()});
+    }
     void scanToken();
-    void addToken(TokenType type);
     void addToken(Token::Literal literal);
     void addIdentifier(std::string name);
+
+    template <typename T> static Token::Token createKeyword(const Scanner &s) {
+        return *(new T(s.getLexeme(), s.getPosition()));
+    }
 
   public:
     Scanner(std::string source);

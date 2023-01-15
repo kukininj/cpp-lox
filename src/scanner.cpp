@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
+#include <functional>
 
 bool Scanner::isAtEnd() { return this->sourcePosition >= this->source.size(); }
 
@@ -15,11 +16,21 @@ char Scanner::currentCharacter() {
     return source[sourcePosition];
 }
 
-Position Scanner::getPosition() {
+Position Scanner::getPosition() const {
     return Position{
         .line = this->lineNumber,
         .position = this->linePosition,
     };
+}
+
+void Scanner::advanceLinePosition() {
+    size_t len = this->sourcePosition - this->lexemeStart;
+    this->linePosition += len - 1;
+}
+
+std::string Scanner::getLexeme() const {
+    size_t len = this->sourcePosition - this->lexemeStart;
+    return this->source.substr(this->lexemeStart, len);
 }
 
 char Scanner::nextCharacter() {
@@ -41,6 +52,8 @@ std::vector<Token::Token> Scanner::getTokens() {
         this->lexemeStart = this->sourcePosition;
         this->scanToken();
     }
+
+    this->tokens.push_back(Token::Eof("", getPosition()));
 
     return this->tokens;
 }
@@ -66,38 +79,38 @@ void Scanner::scanToken() {
     char c = this->consumeCharacter();
     switch (c) {
     // clang-format off
-    case '(': this->addToken(TokenType::LeftParen); break;
-    case ')': this->addToken(TokenType::RightParen); break;
-    case '{': this->addToken(TokenType::LeftBrace); break;
-    case '}': this->addToken(TokenType::RightBrace); break;
-    case ',': this->addToken(TokenType::Comma); break;
-    case '.': this->addToken(TokenType::Dot); break;
-    case '-': this->addToken(TokenType::Minus); break;
-    case '+': this->addToken(TokenType::Plus); break;
-    case ';': this->addToken(TokenType::Semicolon); break;
-    case '*': this->addToken(TokenType::Star); break;
+    case '(': this->addToken<Token::LeftParen>(); break;
+    case ')': this->addToken<Token::RightParen>(); break;
+    case '{': this->addToken<Token::LeftBrace>(); break;
+    case '}': this->addToken<Token::RightBrace>(); break;
+    case ',': this->addToken<Token::Comma>(); break;
+    case '.': this->addToken<Token::Dot>(); break;
+    case '-': this->addToken<Token::Minus>(); break;
+    case '+': this->addToken<Token::Plus>(); break;
+    case ';': this->addToken<Token::Semicolon>(); break;
+    case '*': this->addToken<Token::Star>(); break;
     // clang-format on
     case '!':
-        this->addToken(this->match('=') ? TokenType::BangEqual
-                                        : TokenType::Bang);
+        this->match('=') ? this->addToken<Token::BangEqual>()
+                         : this->addToken<Token::Bang>();
         break;
     case '=':
-        this->addToken(this->match('=') ? TokenType::EqualEqual
-                                        : TokenType::Equal);
+        this->match('=') ? this->addToken<Token::EqualEqual>()
+                         : this->addToken<Token::Equal>();
         break;
     case '<':
-        this->addToken(this->match('=') ? TokenType::LessEqual
-                                        : TokenType::Less);
+        this->match('=') ? this->addToken<Token::LessEqual>()
+                         : this->addToken<Token::Less>();
         break;
     case '>':
-        this->addToken(this->match('=') ? TokenType::GreaterEqual
-                                        : TokenType::Greater);
+        this->match('=') ? this->addToken<Token::GreaterEqual>()
+                         : this->addToken<Token::Greater>();
         break;
     case '/':
         if (this->match('/'))
             this->skipComment();
         else
-            this->addToken(TokenType::Slash);
+            this->addToken<Token::Slash>();
         break;
     case ' ':
     case '\t':
@@ -198,6 +211,7 @@ bool isAlphaNumeric(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
            (c >= '0' && c <= '9') || c == '_';
 }
+
 void Scanner::scanIdentifier() {
     while ((isAlphaNumeric(this->currentCharacter())) && !this->isAtEnd()) {
         this->sourcePosition++;
@@ -207,75 +221,58 @@ void Scanner::scanIdentifier() {
     size_t len = this->sourcePosition - this->lexemeStart;
     std::string name = this->source.substr(this->lexemeStart, len);
 
-    static std::unordered_map<std::string, TokenType> keywords{
-        {"and", TokenType::And},       {"class", TokenType::Class},
-        {"else", TokenType::Else},     {"false", TokenType::False},
-        {"for", TokenType::For},       {"fun", TokenType::Fun},
-        {"if", TokenType::If},         {"nil", TokenType::Nil},
-        {"or", TokenType::Or},         {"print", TokenType::Print},
-        {"return", TokenType::Return}, {"super", TokenType::Super},
-        {"this", TokenType::This},     {"true", TokenType::True},
-        {"var", TokenType::Var},       {"while", TokenType::While},
-    };
+    static std::unordered_map<std::string,
+                              std::function<Token::Token (Scanner & s)>>
+        keywords{
+            {"and", &createKeyword<Token::And>},
+            {"class", &createKeyword<Token::Class>},
+            {"else", &createKeyword<Token::Else>},
+            {"false", &createKeyword<Token::False>},
+            {"fun", &createKeyword<Token::Fun>},
+            {"for", &createKeyword<Token::For>},
+            {"if", &createKeyword<Token::If>},
+            {"nil", &createKeyword<Token::Nil>},
+            {"or", &createKeyword<Token::Or>},
+            {"print", &createKeyword<Token::Print>},
+            {"return", &createKeyword<Token::Return>},
+            {"super", &createKeyword<Token::Super>},
+            {"this", &createKeyword<Token::This>},
+            {"true", &createKeyword<Token::True>},
+            {"var", &createKeyword<Token::Var>},
+            {"while", &createKeyword<Token::While>},
+        };
 
     if (auto type = keywords.find(name); type != keywords.end()) {
-        this->addToken(type->second);
+        this->tokens.push_back(type->second(*this));
     } else {
         this->addIdentifier(name);
     }
 }
 
-void Scanner::addToken(TokenType type) {
-    size_t len = this->sourcePosition - this->lexemeStart;
-    std::string lexeme = this->source.substr(this->lexemeStart, len);
-
-    switch (type) {
-    case TokenType::Identifier:
-        throw new std::logic_error("This function can't handle Identifiers!");
-    case TokenType::String:
-        throw new std::logic_error(
-            "This function can't handle String literals!");
-    case TokenType::Number:
-        throw new std::logic_error(
-            "This function can't handle Number literals!");
-    default:
-        this->tokens.push_back(Token::Token{
-            .type = type, .lexeme = lexeme, .position = this->getPosition()});
-        break;
-    }
-    this->linePosition += len - 1;
-}
-
 template <typename... Ts> struct Overload : Ts... { using Ts::operator()...; };
 template <class... Ts> Overload(Ts...) -> Overload<Ts...>;
 void Scanner::addToken(Token::Literal literal) {
-    size_t len = this->sourcePosition - this->lexemeStart;
-    std::string lexeme = this->source.substr(this->lexemeStart, len);
+    std::string lexeme = this->getLexeme();
 
-    TokenType type = TokenType::Eof;
+    auto toke = std::visit(Overload{
+        [&](std::string &value) -> Token::Token {
+            Token::Token t(*(new Token::StringLiteral(value, lexeme, this->getPosition())));
+            return t;
+        } , [&](double &value) -> Token::Token {
+            Token::Token t(*(new Token::NumberLiteral(value, lexeme, this->getPosition())));
+            return t;
+        }
+}, literal);
 
-    std::visit(Overload{[&type](std::string &_) { type = TokenType::String; },
-                        [&type](double &_) { type = TokenType::Number; }},
-               literal);
-
-    this->tokens.push_back(Token::Token{
-        .type = type,
-        .lexeme = lexeme,
-        .literal = literal,
-        .position = this->getPosition(),
-    });
-    this->linePosition += len - 1;
+    this->tokens.push_back(toke);
+    this->advanceLinePosition();
 }
 
 void Scanner::addIdentifier(std::string name) {
     size_t len = this->sourcePosition - this->lexemeStart;
     std::string lexeme = this->source.substr(this->lexemeStart, len);
 
-    this->tokens.push_back(Token::Token{
-        .type = TokenType::Identifier,
-        .lexeme = lexeme,
-        .literal = name,
-        .position = this->getPosition(),
+    this->tokens.push_back(Token::Identifier { name, lexeme, this->getPosition(),
     });
-    this->linePosition += len - 1;
+    this->advanceLinePosition();
 }
