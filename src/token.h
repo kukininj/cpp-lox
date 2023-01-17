@@ -18,124 +18,115 @@ struct BaseToken {
         : lexeme{lexeme}, position{position} {};
 };
 
-struct Operator : BaseToken {
+struct Minus : BaseToken {
     using BaseToken::BaseToken;
 };
-struct Minus : Operator {
-    using Operator::Operator;
+struct Plus : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Plus : Operator {
-    using Operator::Operator;
+struct Slash : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Slash : Operator {
-    using Operator::Operator;
+struct Star : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Star : Operator {
-    using Operator::Operator;
+struct Bang : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Bang : Operator {
-    using Operator::Operator;
+struct BangEqual : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct BangEqual : Operator {
-    using Operator::Operator;
+struct Equal : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Equal : Operator {
-    using Operator::Operator;
+struct EqualEqual : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct EqualEqual : Operator {
-    using Operator::Operator;
+struct Greater : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Greater : Operator {
-    using Operator::Operator;
+struct GreaterEqual : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct GreaterEqual : Operator {
-    using Operator::Operator;
+struct Less : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Less : Operator {
-    using Operator::Operator;
-};
-struct LessEqual : Operator {
-    using Operator::Operator;
+struct LessEqual : BaseToken {
+    using BaseToken::BaseToken;
 };
 
-struct Special : BaseToken {
+struct Semicolon : BaseToken {
     using BaseToken::BaseToken;
 };
-struct Semicolon : Special {
-    using Special::Special;
+struct LeftParen : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct LeftParen : Special {
-    using Special::Special;
+struct RightParen : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct RightParen : Special {
-    using Special::Special;
+struct LeftBrace : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct LeftBrace : Special {
-    using Special::Special;
+struct RightBrace : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct RightBrace : Special {
-    using Special::Special;
+struct Comma : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Comma : Special {
-    using Special::Special;
+struct Dot : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Dot : Special {
-    using Special::Special;
-};
-struct Eof : Special {
-    using Special::Special;
+struct Eof : BaseToken {
+    using BaseToken::BaseToken;
 };
 
-struct Keyword : BaseToken {
+struct And : BaseToken {
     using BaseToken::BaseToken;
 };
-struct And : Keyword {
-    using Keyword::Keyword;
+struct Class : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Class : Keyword {
-    using Keyword::Keyword;
+struct Else : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Else : Keyword {
-    using Keyword::Keyword;
+struct False : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct False : Keyword {
-    using Keyword::Keyword;
+struct Fun : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Fun : Keyword {
-    using Keyword::Keyword;
+struct For : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct For : Keyword {
-    using Keyword::Keyword;
+struct If : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct If : Keyword {
-    using Keyword::Keyword;
+struct Nil : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Nil : Keyword {
-    using Keyword::Keyword;
+struct Or : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Or : Keyword {
-    using Keyword::Keyword;
+struct Print : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Print : Keyword {
-    using Keyword::Keyword;
+struct Return : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Return : Keyword {
-    using Keyword::Keyword;
+struct Super : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Super : Keyword {
-    using Keyword::Keyword;
+struct This : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct This : Keyword {
-    using Keyword::Keyword;
+struct True : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct True : Keyword {
-    using Keyword::Keyword;
+struct Var : BaseToken {
+    using BaseToken::BaseToken;
 };
-struct Var : Keyword {
-    using Keyword::Keyword;
-};
-struct While : Keyword {
-    using Keyword::Keyword;
+struct While : BaseToken {
+    using BaseToken::BaseToken;
 };
 
 struct Identifier : BaseToken {

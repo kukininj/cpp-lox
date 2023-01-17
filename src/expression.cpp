@@ -1,5 +1,7 @@
 #include "expression.h"
 
+using namespace Expr;
+
 LoxValue Expr::Unary::interpret() { return 1.; }
 
 LoxValue Expr::Binary::interpret() { return 2.; }
