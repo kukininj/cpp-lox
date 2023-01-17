@@ -1,3 +1,5 @@
+#include "expression.h"
+#include "parser.h"
 #include "scanner.h"
 #include "token.h"
 #include <cstdio>
@@ -13,11 +15,25 @@ void run_prompt() {
     std::string code = "";
 
     while (running) {
+        printf(">> ");
         getline(std::cin, code);
         Scanner scanner(code);
 
-        for (auto &token : scanner.getTokens()) {
-            std::cout << &token << std::endl;
+        try {
+            auto tokens = scanner.getTokens();
+            for (auto &token : tokens) {
+                std::cout << token << std::endl;
+            }
+
+            Parser parser(tokens);
+            Expression expr = parser.expression();
+
+            std::cout << expr << std::endl;
+
+        } catch (Exceptions::SyntaxError err) {
+            std::cout << err.what() << std::endl;
+        } catch (Exceptions::ParsingError err) {
+            std::cout << err.what() << std::endl;
         }
     }
 }
@@ -37,6 +53,11 @@ void run_file(std::string filename) {
             for (auto &token : tokens) {
                 std::cout << token << std::endl;
             }
+            Parser parser(tokens);
+            Expression expr = parser.expression();
+
+            std::cout << expr << std::endl;
+
         } catch (std::exception e) {
             std::cout << e.what() << std::endl;
         }
