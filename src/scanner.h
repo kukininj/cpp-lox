@@ -1,11 +1,12 @@
-#include "position.h"
-#include "token.h"
-
 #include <iostream>
 #include <vector>
 
 #ifndef SCANNER
 #define SCANNER
+
+#include "position.h"
+#include "token.h"
+#include "exceptions.h"
 
 class Scanner {
     size_t lineNumber;
@@ -16,6 +17,8 @@ class Scanner {
     std::string source;
 
     std::vector<Token::Token> tokens;
+
+    Exceptions::SyntaxError error(const char *message);
 
     bool isAtEnd();
     char currentCharacter();

@@ -1,5 +1,4 @@
 #include "scanner.h"
-#include "exceptions.h"
 #include "token.h"
 #include <stdexcept>
 #include <unordered_map>
@@ -8,6 +7,13 @@
 #include <functional>
 
 bool Scanner::isAtEnd() { return this->sourcePosition >= this->source.size(); }
+
+Exceptions::SyntaxError Scanner::error(const char *message) {
+        char buffer[512];
+    std::snprintf(buffer, 512, "Error at line %zu, position %zu:\n\t%s", lineNumber,
+                  linePosition, message);
+    return Exceptions::SyntaxError(std::string(buffer));
+}
 
 char Scanner::currentCharacter() {
     if (this->isAtEnd())
@@ -133,7 +139,10 @@ void Scanner::scanToken() {
         this->scanIdentifier();
         break;
     default:
-        throw new Exceptions::SyntaxError("Unexpected character at");
+        std::string msg = "Unexpected character: ";
+        msg += c;
+
+        throw error(msg.c_str());
         break;
     }
 }
@@ -142,7 +151,7 @@ void Scanner::skipComment() {
     // what happens when we reach end of file?
     size_t commentEnd = this->source.find('\n', this->sourcePosition);
     if (commentEnd == std::string::npos)
-        throw std::logic_error("Expected end_of_line after comment");
+        throw error("Expected end_of_line after comment");
 
     // size_t commentLength = commentEnd - this->sourcePosition;
     this->sourcePosition = commentEnd + 1;
@@ -175,7 +184,7 @@ void Scanner::scanStringLiteral() {
         this->sourcePosition++;
         // this->currentCharacter() may only be '"' of '\n'
         if (this->isAtEnd()) {
-            throw new Exceptions::SyntaxError("Unterminated string literal");
+            throw error("Unterminated string literal");
         }
     }
 

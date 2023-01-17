@@ -18,12 +18,13 @@ class Parser {
     std::vector<Token::Token>::iterator iterator;
 
     Position getCurrentPosition();
-    Exceptions::ParsingError *error(const char *message);
+    Exceptions::ParsingError error(const char *message);
 
     template <typename T> void consume();
     template <typename T> bool match();
 
     Token::Token &nextToken();
+    template <typename T> T &nextToken();
 
     Expression equality();
     Expression comparison();
