@@ -6,6 +6,8 @@
 namespace Exceptions {
 EXCEPTION(NotImplemented)
 EXCEPTION(SyntaxError)
+EXCEPTION(ParsingError)
+
 }
 
 #undef EXCEPTION
