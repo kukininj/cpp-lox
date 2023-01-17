@@ -9,31 +9,31 @@ namespace Token {
 std::ostream &operator<<(std::ostream &strm, const Token &token) {
     return std::visit(
         Overload{[&strm](const StringLiteral &token) -> std::ostream & {
-                     return strm << "Token: {"
-                                 << " type: " << getName(token) << " lexeme: \""
-                                 << token.lexeme << "\""
-                                 << " value: " << token.value << " position: {"
+                     return strm << "Token:{"
+                                 << " type: " << getName(token) // 
+                                 // << " lexeme: \"" << token.lexeme << "\""
+                                 << " value: " << token.value << " pos:{"
                                  << token.position << "} }";
                  },
                  [&strm](const NumberLiteral &token) -> std::ostream & {
-                     return strm << "Token: {"
-                                 << " type: " << getName(token) << " lexeme: \""
-                                 << token.lexeme << "\""
-                                 << " value: " << token.value << " position: {"
+                     return strm << "Token:{"
+                                 << " type: " << getName(token) //
+                                 // << " lexeme: \"" << token.lexeme << "\""
+                                 << " value: " << token.value << " pos:{"
                                  << token.position << "} }";
                  },
                  [&strm](const Identifier &token) -> std::ostream & {
-                     return strm << "Token: {"
-                                 << " type: " << getName(token) << " lexeme: \""
-                                 << token.lexeme << "\""
-                                 << " value: " << token.value << " position: {"
+                     return strm << "Token:{"
+                                 << " type: " << getName(token) //
+                                 // << " lexeme: \"" << token.lexeme << "\""
+                                 << " value: " << token.value << " pos:{"
                                  << token.position << "} }";
                  },
                  [&strm](const auto &token) -> std::ostream & {
-                     return strm << "Token: {"
-                                 << " type: " << getName(token) << " lexeme: \""
-                                 << token.lexeme << "\""
-                                 << " position: {" << token.position << "} }";
+                     return strm << "Token:{"
+                                 << " type: " << getName(token) // 
+                                 // << " lexeme: \"" << token.lexeme << "\""
+                                 << " pos:{" << token.position << "} }";
                  }
 
         },

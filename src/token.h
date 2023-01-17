@@ -142,19 +142,19 @@ struct Identifier : BaseToken {
     using BaseToken::BaseToken;
     std::string value;
     Identifier(std::string value, std::string lexeme, Position position)
-        : value(value), BaseToken{lexeme, position} {};
+        : BaseToken{lexeme, position}, value(value){};
 };
 struct StringLiteral : BaseToken {
     using BaseToken::BaseToken;
     std::string value;
     StringLiteral(std::string value, std::string lexeme, Position position)
-        : value(value), BaseToken{lexeme, position} {};
+        : BaseToken{lexeme, position}, value(value){};
 };
 struct NumberLiteral : BaseToken {
     using BaseToken::BaseToken;
     double value;
     NumberLiteral(double value, std::string lexeme, Position position)
-        : value(value), BaseToken{lexeme, position} {};
+        : BaseToken{lexeme, position}, value(value){};
 };
 
 struct Token : std::variant<Identifier, StringLiteral, NumberLiteral,
