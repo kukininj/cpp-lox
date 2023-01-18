@@ -1,4 +1,5 @@
 #include "expression.h"
+#include "interpreter.h"
 #include "parser.h"
 #include "scanner.h"
 #include "token.h"
@@ -14,6 +15,8 @@ void run_prompt() {
 
     std::string code = "";
 
+    Interpreter interpeter;
+
     while (running) {
         printf(">> ");
         getline(std::cin, code);
@@ -21,18 +24,23 @@ void run_prompt() {
 
         try {
             auto tokens = scanner.getTokens();
-            for (auto &token : tokens) {
-                std::cout << token << std::endl;
-            }
+            // for (auto &token : tokens) {
+            //     std::cout << token << std::endl;
+            // }
 
             Parser parser(tokens);
             Expression expr = parser.expression();
 
             std::cout << expr << std::endl;
 
+            LoxValue result = interpeter.interpret(expr);
+            std::cout << result << std::endl;
+
         } catch (Exceptions::SyntaxError err) {
             std::cout << err.what() << std::endl;
         } catch (Exceptions::ParsingError err) {
+            std::cout << err.what() << std::endl;
+        } catch (Exceptions::RuntimeException err) {
             std::cout << err.what() << std::endl;
         }
     }
