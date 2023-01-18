@@ -95,7 +95,7 @@ Expression Parser::factor() {
 };
 
 Expression Parser::unary() {
-    if (match<Token::Minus>() || match<Token::Plus>()) {
+    if (match<Token::Minus>() || match<Token::Bang>()) {
         Token::Token &op = nextToken();
         Expression right = primary();
         return Expression(Unary(op, std::move(right)));
@@ -107,11 +107,11 @@ Expression Parser::unary() {
 Expression Parser::primary() {
     if (match<Token::False>()) {
         consume<Token::False>();
-        return Expression(Literal(LoxFalse()));
+        return Expression(Literal(false));
     }
     if (match<Token::True>()) {
         consume<Token::True>();
-        return Expression(Literal(LoxTrue()));
+        return Expression(Literal(true));
     }
     if (match<Token::Nil>()) {
         consume<Token::Nil>();
