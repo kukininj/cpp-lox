@@ -65,7 +65,7 @@ LoxValue operator-(LoxValue &left, LoxValue &right) {
     if (left.is<double>() && right.is<double>()) {
         return left.into<double>() - right.into<double>();
     }
-    throw binary_op_error("+", left, right);
+    throw binary_op_error("-", left, right);
 }
 
 LoxValue operator*(LoxValue &left, LoxValue &right) {
@@ -77,7 +77,7 @@ LoxValue operator*(LoxValue &left, LoxValue &right) {
 
 LoxValue operator/(LoxValue &left, LoxValue &right) {
     if (left.is<double>() && right.is<double>()) {
-        return left.into<double>() - right.into<double>();
+        return left.into<double>() / right.into<double>();
     }
     throw binary_op_error("/", left, right);
 }

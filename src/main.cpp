@@ -63,7 +63,7 @@ void run_file(std::string filename) {
             auto program = parser.parse();
 
             for (auto &stmt : program) {
-                std::cout << stmt << std::endl;
+                // std::cout << stmt << std::endl;
                 LoxValue result = interpeter.interpret(stmt);
             }
 
