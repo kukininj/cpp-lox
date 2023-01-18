@@ -82,6 +82,47 @@ LoxValue operator/(LoxValue &left, LoxValue &right) {
     throw binary_op_error("/", left, right);
 }
 
+LoxValue operator==(LoxValue &left, LoxValue &right) {
+    if (left.is<double>() && right.is<double>()) {
+        return left.into<double>() == right.into<double>();
+    } else if (left.is<bool>() && right.is<bool>()) {
+        return left.into<bool>() == right.into<bool>();
+    } else if (left.is<std::string>() && right.is<std::string>()) {
+        return left.into<std::string>() == right.into<std::string>();
+    } else if (left.is<LoxNil>() && right.is<LoxNil>()) {
+        return true;
+    }
+    return false;
+}
+
+LoxValue operator<=(LoxValue &left, LoxValue &right) {
+    if (left.is<double>() && right.is<double>()) {
+        return left.into<double>() <= right.into<double>();
+    }
+    throw binary_op_error("<=", left, right);
+}
+
+LoxValue operator>=(LoxValue &left, LoxValue &right) {
+    if (left.is<double>() && right.is<double>()) {
+        return left.into<double>() >= right.into<double>();
+    }
+    throw binary_op_error(">=", left, right);
+}
+
+LoxValue operator<(LoxValue &left, LoxValue &right) {
+    if (left.is<double>() && right.is<double>()) {
+        return left.into<double>() < right.into<double>();
+    }
+    throw binary_op_error("<", left, right);
+}
+
+LoxValue operator>(LoxValue &left, LoxValue &right) {
+    if (left.is<double>() && right.is<double>()) {
+        return left.into<double>() > right.into<double>();
+    }
+    throw binary_op_error(">", left, right);
+}
+
 LoxValue Interpreter::visitBinary(const Binary &expression) {
     LoxValue left = visitExpression(expression.left);
     LoxValue right = visitExpression(expression.right);
@@ -93,6 +134,16 @@ LoxValue Interpreter::visitBinary(const Binary &expression) {
         return left * right;
     } else if (expression.token.is<Token::Slash>()) {
         return left / right;
+    } else if (expression.token.is<Token::EqualEqual>()) {
+        return left == right;
+    } else if (expression.token.is<Token::GreaterEqual>()) {
+        return left >= right;
+    } else if (expression.token.is<Token::LessEqual>()) {
+        return left <= right;
+    } else if (expression.token.is<Token::Greater>()) {
+        return left > right;
+    } else if (expression.token.is<Token::Less>()) {
+        return left < right;
     } else
         throw runtime_error("unnkown Binary token", expression.token);
 };
