@@ -258,8 +258,6 @@ void Scanner::scanIdentifier() {
     }
 }
 
-template <typename... Ts> struct Overload : Ts... { using Ts::operator()...; };
-template <class... Ts> Overload(Ts...) -> Overload<Ts...>;
 void Scanner::addToken(Token::Literal literal) {
     std::string lexeme = this->getLexeme();
 
