@@ -2,37 +2,30 @@
 #include <iostream>
 #include <variant>
 
-template <typename... Ts> struct Overload : Ts... { using Ts::operator()...; };
-template <class... Ts> Overload(Ts...) -> Overload<Ts...>;
-
 namespace Token {
 std::ostream &operator<<(std::ostream &strm, const Token &token) {
     return std::visit(
         Overload{[&strm](const StringLiteral &token) -> std::ostream & {
-                     return strm << "Token:{"
-                                 << " type: " << getName(token) // 
-                                 // << " lexeme: \"" << token.lexeme << "\""
-                                 << " value: " << token.value << " pos:{"
-                                 << token.position << "} }";
+                     return strm << "Token:{"                   //
+                                 << " type: " << getName(token) //
+                                 << " value: " << token.value   //
+                                 << " pos:{" << token.position << "} }";
                  },
                  [&strm](const NumberLiteral &token) -> std::ostream & {
                      return strm << "Token:{"
                                  << " type: " << getName(token) //
-                                 // << " lexeme: \"" << token.lexeme << "\""
-                                 << " value: " << token.value << " pos:{"
-                                 << token.position << "} }";
+                                 << " value: " << token.value   //
+                                 << " pos:{" << token.position << "} }";
                  },
                  [&strm](const Identifier &token) -> std::ostream & {
                      return strm << "Token:{"
                                  << " type: " << getName(token) //
-                                 // << " lexeme: \"" << token.lexeme << "\""
-                                 << " value: " << token.value << " pos:{"
-                                 << token.position << "} }";
+                                 << " value: " << token.value   //
+                                 << " pos:{" << token.position << "} }";
                  },
                  [&strm](const auto &token) -> std::ostream & {
                      return strm << "Token:{"
-                                 << " type: " << getName(token) // 
-                                 // << " lexeme: \"" << token.lexeme << "\""
+                                 << " type: " << getName(token) //
                                  << " pos:{" << token.position << "} }";
                  }
 
@@ -90,4 +83,10 @@ const char *getName(const Token &token) {
 // clang-format on
 }
 
+Position Token::getPosition() const {
+    return std::visit(Overload{[](const BaseToken token) -> Position {
+                          return token.position;
+                      }},
+                      *this);
+};
 } // namespace Token

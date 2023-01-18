@@ -2,6 +2,7 @@
 #define TOKEN
 
 #include "position.h"
+#include "overload.h"
 #include <iostream>
 #include <optional>
 #include <variant>
@@ -10,9 +11,7 @@ namespace Token {
 typedef std::variant<std::string, double> Literal;
 
 struct BaseToken {
-    // TokenType type;
     std::string lexeme;
-    // std::optional<Literal> literal;
     Position position;
     explicit BaseToken(std::string lexeme, Position position)
         : lexeme{lexeme}, position{position} {};
@@ -163,6 +162,10 @@ struct Token : std::variant<Identifier, StringLiteral, NumberLiteral,
 
                             Eof> {
     using variant::variant;
+    Position getPosition() const;
+    template <typename T> bool is() const {
+        return std::holds_alternative<T>(*this);
+    }
 };
 
 const char *getName(const Token &token);
