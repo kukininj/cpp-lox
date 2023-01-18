@@ -37,7 +37,17 @@ template <typename T> T &Parser::nextToken() {
     return std::get<T>(*(iterator++).base());
 };
 
-Expression Parser::expression() { return equality(); };
+std::vector<Statement> Parser::parse() {
+    std::vector<Statement> statements;
+
+    while (!isAtEnd()) {
+        statements.push_back(statement());
+    }
+
+    return statements;
+};
+
+Expression Parser::expression() { return equality(); }
 
 Expression Parser::equality() {
     Expression expr = comparison();
@@ -137,3 +147,32 @@ Expression Parser::primary() {
     }
     throw error("expected Primary.");
 }
+bool Parser::isAtEnd() { return match<Token::Eof>() || iterator == tokens.end(); };
+
+Statement Parser::statement() {
+    if (match<Token::Print>())
+        return printStatement();
+    else
+        return expressionStatement();
+}
+
+Statement Parser::printStatement() {
+    consume<Token::Print>();
+    Expression expr = expression();
+    try {
+        consume<Token::Semicolon>();
+    } catch (std::logic_error) {
+        throw error("expected ';' after expression");
+    }
+    return PrintStatement(std::move(expr));
+};
+
+Statement Parser::expressionStatement() {
+    Expression expr = expression();
+    try {
+        consume<Token::Semicolon>();
+    } catch (std::logic_error) {
+        throw error("expected ';' after expression");
+    }
+    return ExpressionStatement(std::move(expr));
+};

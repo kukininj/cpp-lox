@@ -29,13 +29,13 @@ void run_prompt() {
             // }
 
             Parser parser(tokens);
-            Expression expr = parser.expression();
-
-            std::cout << expr << std::endl;
-
-            LoxValue result = interpeter.interpret(expr);
+            auto program = parser.parse();
+            LoxValue result;
+            for (auto &stmt : program) {
+                std::cout << stmt << std::endl;
+                result = interpeter.interpret(stmt);
+            }
             std::cout << result << std::endl;
-
         } catch (Exceptions::SyntaxError err) {
             std::cout << err.what() << std::endl;
         } catch (Exceptions::ParsingError err) {
@@ -56,18 +56,23 @@ void run_file(std::string filename) {
         source = stream.str();
         Scanner scanner(source);
 
+        Interpreter interpeter;
         try {
             auto tokens = scanner.getTokens();
-            for (auto &token : tokens) {
-                std::cout << token << std::endl;
-            }
             Parser parser(tokens);
-            Expression expr = parser.expression();
+            auto program = parser.parse();
 
-            std::cout << expr << std::endl;
+            for (auto &stmt : program) {
+                std::cout << stmt << std::endl;
+                LoxValue result = interpeter.interpret(stmt);
+            }
 
-        } catch (std::exception e) {
-            std::cout << e.what() << std::endl;
+        } catch (Exceptions::SyntaxError err) {
+            std::cout << err.what() << std::endl;
+        } catch (Exceptions::ParsingError err) {
+            std::cout << err.what() << std::endl;
+        } catch (Exceptions::RuntimeException err) {
+            std::cout << err.what() << std::endl;
         }
     } else {
         printf("Could not read file %s", filename.c_str());

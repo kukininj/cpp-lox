@@ -15,8 +15,8 @@ RuntimeException runtime_error(const char *message, const Token::Token &token) {
     return RuntimeException(std::string(buffer));
 }
 
-LoxValue Interpreter::interpret(const Expression &expression) {
-    return visitExpression(expression);
+LoxValue Interpreter::interpret(const Statement &stmt) {
+    return visitStateent(stmt);
 };
 
 LoxValue Interpreter::visitUnary(const Unary &expression) {
@@ -167,4 +167,23 @@ LoxValue Interpreter::visitExpression(const Expression &expression) {
     }
 
     throw RuntimeException("unhandled Expression type");
+};
+LoxValue Interpreter::visitStateent(const Statement &statement) {
+    if (statement.is<PrintStatement>()) {
+        return visitPrintStateent(statement.into<PrintStatement>());
+    } else if (statement.is<ExpressionStatement>()) {
+        return visitExpressionStateent(statement.into<ExpressionStatement>());
+    }
+
+    else
+        throw Exceptions::NotImplemented("not implemented statement");
+};
+LoxValue Interpreter::visitPrintStateent(const PrintStatement &statement) {
+    LoxValue value = visitExpression(statement.expr);
+    std::cout << value << std::endl;
+    return LoxNil();
+};
+LoxValue
+Interpreter::visitExpressionStateent(const ExpressionStatement &statement) {
+    return visitExpression(statement.expr);
 };
