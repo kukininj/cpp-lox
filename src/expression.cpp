@@ -2,19 +2,6 @@
 
 using namespace Expr;
 
-LoxValue Expr::Unary::interpret() { return 1.; }
-
-LoxValue Expr::Binary::interpret() { return 2.; }
-
-LoxValue Expr::Grouping::interpret() { return 2.; }
-
-LoxValue Expr::Literal::interpret() { return value; };
-
-LoxValue Expr::ExpressionBase::interpret() {
-    return std::visit(
-        Overload{[](auto &b) -> LoxValue { return b.interpret(); }}, *this);
-}
-
 std::ostream &Expr::operator<<(std::ostream &strm, const Expression &expr) {
     return std::visit( //
         Overload{
@@ -39,4 +26,15 @@ std::ostream &Expr::operator<<(std::ostream &strm, const Expression &expr) {
             },
         },
         *expr.base.get());
+};
+
+const char *Expr::Expression::getName() const {
+    return std::visit( //
+        Overload{
+            [](const Unary &) -> const char * { return "Unary"; },
+            [](const Binary &) -> const char * { return "Binary"; },
+            [](const Grouping &) -> const char * { return "Grouping"; },
+            [](const Literal &) -> const char * { return "Literal"; },
+        },
+        *base.get());
 };
