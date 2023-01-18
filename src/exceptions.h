@@ -4,14 +4,17 @@
 #ifndef EXCEPT
 #define EXCEPT
 
-
-#define EXCEPTION(NAME) class NAME : public std::logic_error { public: NAME(const std::string& message) : std::logic_error(message) { }; };
+#define EXCEPTION(NAME)                                                        \
+    class NAME : public std::logic_error {                                     \
+        using logic_error::logic_error;                                        \
+    };
 
 namespace Exceptions {
 EXCEPTION(NotImplemented)
 EXCEPTION(SyntaxError)
 EXCEPTION(ParsingError)
+EXCEPTION(RuntimeException)
 
-}
+} // namespace Exceptions
 
 #endif
